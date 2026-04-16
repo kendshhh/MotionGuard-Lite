@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MotionGuard Lite Presentation</title>
+  <style>
+    :root {
+      --bg: #101820;
+      --panel: #172635;
+      --accent: #ffd166;
+      --accent-2: #5ec2f2;
+      --text: #f7f7f2;
+      --muted: #c7d3dd;
+      --good: #5dd39e;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Georgia, "Segoe UI", serif;
+      background: linear-gradient(135deg, #0d1620, #1f3347);
+      color: var(--text);
+    }
+    .deck {
+      display: grid;
+      gap: 24px;
+      padding: 24px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .slide {
+      min-height: 80vh;
+      padding: 40px;
+      background: rgba(23, 38, 53, 0.94);
+      border: 1px solid rgba(255, 209, 102, 0.2);
+      border-radius: 24px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .tag {
+      color: var(--accent-2);
+      font-size: 0.95rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      font-weight: 700;
+    }
+    h1, h2 {
+      margin: 0 0 16px;
+      line-height: 1.1;
+    }
+    h1 {
+      font-size: clamp(2.2rem, 5vw, 4.4rem);
+    }
+    h2 {
+      font-size: clamp(1.8rem, 4vw, 3rem);
+      color: var(--accent);
+    }
+    p, li {
+      font-size: 1.15rem;
+      line-height: 1.65;
+      color: var(--muted);
+    }
+    ul, ol {
+      margin: 0;
+      padding-left: 24px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+    .card {
+      padding: 18px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .card strong {
+      display: block;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+    .good {
+      color: var(--good);
+      font-weight: 700;
+    }
+    .members {
+      margin-top: 16px;
+      font-size: 1.1rem;
+    }
+    @media (max-width: 700px) {
+      .slide { padding: 28px; min-height: auto; }
+    }
+  </style>
+</head>
+<body>
+  <main class="deck">
+    <section class="slide">
+      <div class="tag">Slide 1</div>
+      <h1>MotionGuard Lite</h1>
+      <p>A Python-Based Self-Defense Training Guide and Progress Tracker</p>
+      <div class="members">
+        <p>Group Members:</p>
+        <p>1. ____________________</p>
+        <p>2. ____________________</p>
+        <p>3. ____________________</p>
+        <p>4. ____________________</p>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="tag">Slide 2</div>
+      <h2>Project Purpose</h2>
+      <ul>
+        <li>Build a functional Python terminal system for guided self-defense practice.</li>
+        <li>Combine terminal interaction, file handling, and optional OpenCV webcam validation.</li>
+        <li>Demonstrate course programming concepts through a practical real-world problem.</li>
+      </ul>
+    </section>
+
+    <section class="slide">
+      <div class="tag">Slide 3</div>
+      <h2>Main Features</h2>
+      <div class="grid">
+        <div class="card"><strong>Training Mode</strong><span>Choose a technique and generate an automatic session summary.</span></div>
+        <div class="card"><strong>Technique Guide</strong><span>View Block, Punch, and Escape instructions.</span></div>
+        <div class="card"><strong>Progress Tracking</strong><span>Save and review practice records in a text file.</span></div>
+        <div class="card"><strong>Webcam Validation</strong><span>Use OpenCV for live technique feedback and fullscreen viewing.</span></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="tag">Slide 4</div>
+      <h2>Programming Concepts Applied</h2>
+      <div class="grid">
+        <div class="card"><strong>Data Types</strong><span>int, float, str, bool</span></div>
+        <div class="card"><strong>Operators</strong><span>Arithmetic, relational, and logical operators</span></div>
+        <div class="card"><strong>Control Structures</strong><span>if, elif, else for menu and scoring logic</span></div>
+        <div class="card"><strong>Loops</strong><span>for and while loops for user interaction and processing</span></div>
+        <div class="card"><strong>Functions</strong><span>Reusable functions for menu flow, scoring, validation, and display</span></div>
+        <div class="card"><strong>List Handling</strong><span>Lists for techniques, steps, feedback, and progress records</span></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="tag">Slide 5</div>
+      <h2>File Handling and Error Handling</h2>
+      <ul>
+        <li><span class="good">File Handling:</span> creates, reads, and updates <code>progress.txt</code>.</li>
+        <li><span class="good">Additional File Use:</span> temporary JSON validation data for OpenCV fallback flow.</li>
+        <li><span class="good">Error Handling:</span> validates user input and prevents crashes on missing files or invalid values.</li>
+        <li><span class="good">Exception Handling:</span> uses try/except for webcam validation, file access, and interpreter fallback.</li>
+      </ul>
+    </section>
+
+    <section class="slide">
+      <div class="tag">Slide 6</div>
+      <h2>System Demonstration Flow</h2>
+      <ol>
+        <li>Open the terminal app.</li>
+        <li>Select <strong>Start Training</strong>.</li>
+        <li>Choose Block, Punch, or Escape.</li>
+        <li>Choose whether to use OpenCV webcam validation.</li>
+        <li>Review live feedback and finish the session.</li>
+        <li>Show saved progress and computed results.</li>
+      </ol>
+    </section>
+
+    <section class="slide">
+      <div class="tag">Slide 7</div>
+      <h2>How Errors Are Handled</h2>
+      <ul>
+        <li>Invalid menu choices are rejected safely.</li>
+        <li>Invalid login or registration input is rejected before account actions continue.</li>
+        <li>Back and cancel options allow safe return to the main menu.</li>
+        <li>Missing OpenCV in the active interpreter triggers a retry using the project virtual environment.</li>
+        <li>Camera and pose-detection problems display readable feedback instead of crashing the program.</li>
+      </ul>
+    </section>
+
+    <section class="slide">
+      <div class="tag">Slide 8</div>
+      <h2>Conclusion</h2>
+      <p>MotionGuard Lite is a complete Python terminal project that satisfies the required programming concepts, demonstrates practical problem solving, and provides a functional user-facing system with robust handling of both user input and system-level errors.</p>
+    </section>
+  </main>
+</body>
+</html>
