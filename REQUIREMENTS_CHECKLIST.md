@@ -57,6 +57,7 @@ This checklist maps the course requirements to the current MotionGuard Lite syst
 - [x] Clean and readable code structure
 - [x] Required programming concepts integrated
 - [x] Robust error handling
+- [x] Automatic score and accuracy computation in both webcam-validation and manual-entry training paths
 
 ## Documentation Requirements
 

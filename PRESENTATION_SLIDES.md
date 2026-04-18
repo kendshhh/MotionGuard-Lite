@@ -13,25 +13,25 @@ Group Members:
 
 ## Slide 2: Project Purpose
 
-- Python-based terminal project for guided self-defense practice
-- Combines terminal interaction, file handling, and OpenCV webcam validation
-- Solves a practical problem by helping users train and track progress
+- Provide a Python-based training tool for guided self-defense practice
+- Combine terminal interaction, file handling, and optional OpenCV webcam validation
+- Solve a practical problem by helping users practice techniques and track progress
 
 ## Slide 3: System Objectives
 
-- Provide a functional menu-driven Python program
-- Demonstrate all required programming concepts from class
-- Handle user and system errors safely
-- Save and review training records
+- Build a functional menu-driven Python program
+- Demonstrate all required programming concepts in one complete system
+- Handle invalid input and runtime errors safely
+- Save and review training performance over time
 
 ## Slide 4: Main Features
 
-- Start Training
-- View Techniques Guide
-- View Progress
-- Webcam validation with real-time feedback
-- Fullscreen OpenCV display
-- Automatic session summary and progress saving to text file
+- Guided training for Block, Punch, and Escape
+- Technique guide and progress review
+- Real-time webcam validation with live feedback
+- Manual summary entry when webcam validation is skipped
+- Fullscreen OpenCV display controls
+- Automatic score calculation and progress saving
 
 ## Slide 5: Programming Concepts Applied
 
@@ -46,18 +46,19 @@ Group Members:
 ## Slide 6: File Handling Used
 
 - Creates `progress.txt` when needed
-- Reads saved records
-- Writes and updates training data
+- Reads saved training records
+- Writes and updates training results
+- Creates and updates `users.json` for account storage
 - Uses temporary JSON files for webcam-validation fallback communication
 
 ## Slide 7: Error Handling Implemented
 
 - Menu input validation
-- Authentication input validation and back/cancel support
+- Authentication validation and back/cancel support
 - Exception handling with `try` and `except`
-- Missing file protection
+- Missing-file protection
 - Webcam and camera-backend error handling
-- OpenCV missing-package fallback to project venv
+- OpenCV fallback through the project virtual environment
 
 ## Slide 8: Demo Flow
 
@@ -65,18 +66,19 @@ Group Members:
 2. Choose `1. Start Training`
 3. Select a technique
 4. Choose whether to use webcam validation
-5. Perform the move and review feedback
-6. Save and review progress
+5. If Yes, perform the move and review live feedback
+6. If No, enter repetitions and successful repetitions manually
+7. Review the session summary and saved progress
 
 ## Slide 9: Invalid Input / Error Demo
 
-- Show invalid menu input
-- Show invalid login or registration input
-- Show back/cancel flow
+- Show invalid menu input handling
+- Show invalid login or registration input handling
+- Show back/cancel navigation
 - Show webcam fallback or pose-not-clear handling
 
 ## Slide 10: Conclusion
 
-- The project is functional, organized, and practical
+- The project is functional, practical, and well organized
 - It demonstrates all required Python programming concepts
-- It provides a clear example of Python solving a real-world training and tracking task
+- It shows how Python can solve a real-world training and tracking problem

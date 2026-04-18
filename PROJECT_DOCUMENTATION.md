@@ -15,7 +15,7 @@ Fill in your actual group members before submission:
 
 ## Brief Description of the System
 
-MotionGuard Lite is a Python-based terminal system that helps users practice basic self-defense techniques such as Block, Punch, and Escape. The system provides a menu-driven terminal workflow, technique guidance, progress tracking, and optional OpenCV-based webcam validation with real-time feedback.
+MotionGuard Lite is a Python-based terminal system that helps users practice basic self-defense techniques such as Block, Punch, and Escape. The system provides a menu-driven terminal workflow, technique guidance, progress tracking, and optional OpenCV-based webcam validation with real-time dashboard feedback.
 
 ## Objectives of the Project
 
@@ -29,11 +29,12 @@ MotionGuard Lite is a Python-based terminal system that helps users practice bas
 2. Technique selection for Block, Punch, and Escape
 3. Step-by-step technique guide
 4. Session metrics and score tracking based on saved training results
-5. Automatic score and accuracy computation
+5. Automatic score and accuracy computation for both webcam-validated sessions and manual-summary sessions
 6. Progress history saved to a text file
-7. Optional OpenCV webcam validation with technique-specific feedback
-8. Fullscreen-capable OpenCV feedback window
-9. Input validation, exception handling, and back/cancel navigation
+7. Optional OpenCV webcam validation with technique-specific dashboard feedback
+8. Manual summary entry when webcam validation is skipped
+9. Fullscreen-capable OpenCV feedback window with live status cards and confidence indicators
+10. Input validation, exception handling, and back/cancel navigation
 
 ## Programming Concepts Applied
 
@@ -95,6 +96,7 @@ The project demonstrates file handling through:
 - creating `progress.txt` if it does not exist
 - reading saved records from `progress.txt`
 - appending new training records to `progress.txt`
+- creating, reading, and updating `users.json` for local account storage
 - writing temporary JSON validation summaries when webcam validation falls back to the project virtual environment
 
 ### 7. Error Handling
@@ -111,6 +113,8 @@ The system uses error handling through:
 ## Explanation of File Handling Used
 
 The main text file used by the system is `progress.txt`. It stores the user's timestamp, username, technique, repetitions, successful repetitions, accuracy, score, status, detected technique, recognition confidence, and match result. The program creates the file automatically when needed, reads existing data safely, migrates older progress-file formats when necessary, and appends new session results after each completed training run.
+
+The system also uses `users.json` to store registered usernames together with password salts and password hashes for login authentication.
 
 The webcam validation fallback also uses a temporary JSON file so that `main.py` can receive OpenCV validation results even if the active interpreter does not have the `cv2` package installed.
 

@@ -18,6 +18,8 @@ PROGRESS_FILE = Path(__file__).resolve().parent / "progress.txt"
 USERS_FILE = Path(__file__).resolve().parent / "users.json"
 MODEL_PATH = Path(__file__).resolve().parent / "models" / "graph_opt.pb"
 VENV_PYTHON = Path(__file__).resolve().parent / ".venv" / "Scripts" / "python.exe"
+REFERENCE_POSE_DIR = Path(__file__).resolve().parent / "reference_poses"
+REFERENCE_POSE_EXTENSIONS = (".png", ".jpg", ".jpeg", ".webp", ".bmp", ".ppm")
 BACK_COMMANDS = {"0", "b", "back", "c", "cancel"}
 EXIT_COMMANDS = {"q", "quit", "e", "exit"}
 LEGACY_PROGRESS_USERNAME = "legacy"
@@ -40,6 +42,7 @@ STATUS_COLORS = {
     "passed": "green",
     "needs improvement": "yellow",
     "matched": "green",
+    "near match": "yellow",
     "not matched": "yellow",
     "not run": "gray",
     "correct": "green",
@@ -51,6 +54,7 @@ STATUS_COLORS = {
 TECHNIQUES = [
     {
         "name": "Block",
+        "reference_pose": "block",
         "description": "A defensive move used to protect the face or body from an incoming strike.",
         "steps": [
             "Stand with your feet shoulder-width apart.",
@@ -62,25 +66,44 @@ TECHNIQUES = [
     },
     {
         "name": "Punch",
+        "reference_pose": "punch",
         "description": "A fast straight strike used to create distance and stop an aggressor.",
         "steps": [
             "Keep one hand guarding your face.",
-            "Rotate your shoulder and extend your dominant hand forward.",
-            "Aim for the center line of the target.",
-            "Return your hand quickly to the guard position.",
+            "Rotate your shoulder and extend your dominant hand forward at shoulder height.",
+            "Aim the punch through the center line instead of swinging it outward.",
+            "Hold the punch briefly, then return your hand quickly to the guard position.",
         ],
         "situation": "Use this when you need to distract an attacker and create space to escape.",
     },
     {
         "name": "Escape",
+        "reference_pose": "escape",
         "description": "A defensive response for breaking free and moving to safety.",
         "steps": [
-            "Protect your head and maintain balance.",
-            "Shift your weight and step backward or sideways.",
-            "Break contact by pulling toward the attacker's thumb side or weak angle.",
-            "Create distance and move immediately to a safe area.",
+            "Keep at least one hand protecting your head and stay balanced.",
+            "Shift your weight and step backward or sideways until your body moves off the center line.",
+            "Break contact by pulling toward the attacker's thumb side or weak angle as you move.",
+            "Create distance immediately and keep moving to a safe area.",
         ],
         "situation": "Use this when an attacker grabs you and your main goal is to get away safely.",
+    },
+]
+WEBCAM_PRESETS = [
+    {
+        "name": "fast",
+        "label": "Fast",
+        "description": "Quickest response and accepts near matches when your pose is close enough.",
+    },
+    {
+        "name": "balanced",
+        "label": "Balanced",
+        "description": "Middle ground between responsiveness and stricter matching.",
+    },
+    {
+        "name": "strict",
+        "label": "Strict",
+        "description": "Slowest confirmation and requires the tightest pose match.",
     },
 ]
 
@@ -292,8 +315,49 @@ def view_techniques() -> None:
         for step_number, step in enumerate(technique["steps"], start=1):
             print(f"  {step_number}. {step}")
         print_kv("Best Situation", technique["situation"], value_color="gray")
+        reference_path = resolve_reference_pose_path(str(technique["reference_pose"]))
+        if reference_path is not None:
+            print_kv("Reference Pose", reference_path.name, value_color="gray")
     print()
     wait_for_return()
+
+
+def resolve_reference_pose_path(reference_stem: str) -> Path | None:
+    for extension in REFERENCE_POSE_EXTENSIONS:
+        candidate = REFERENCE_POSE_DIR / f"{reference_stem}{extension}"
+        if candidate.is_file():
+            return candidate
+
+    if not REFERENCE_POSE_DIR.is_dir():
+        return None
+
+    normalized_stem = reference_stem.strip().lower()
+    for candidate in sorted(REFERENCE_POSE_DIR.iterdir()):
+        if not candidate.is_file() or candidate.suffix.lower() not in REFERENCE_POSE_EXTENSIONS:
+            continue
+        if normalized_stem in candidate.stem.lower():
+            return candidate
+    return None
+
+
+def show_technique_reference(technique: dict) -> Path | None:
+    reference_stem = technique.get("reference_pose")
+    if not isinstance(reference_stem, str):
+        return None
+    reference_path = resolve_reference_pose_path(reference_stem)
+
+    print_section("Reference Pose", "blue")
+    if reference_path is None:
+        print_error(
+            f"A real-photo reference image is required for {technique['name']}. "
+            f"Add an image file containing '{reference_stem}' to the reference_poses folder."
+        )
+        print_warning("Training canceled. Returning to the main menu.")
+        return None
+
+    print_kv("Reference File", reference_path.name, value_color="white", value_bold=True)
+    print_info("The live webcam window will show this reference photo beside your camera feed.")
+    return reference_path
 
 
 def get_positive_int(prompt: str) -> int | None:
@@ -373,6 +437,33 @@ def ask_yes_no(prompt: str) -> bool | None:
         print_error("Please choose 1, 2, or 3.")
 
 
+def choose_webcam_preset() -> dict | None:
+    print_section("Webcam Preset", "blue")
+    print_info("Choose how strict the webcam matching should be.")
+    for index, preset in enumerate(WEBCAM_PRESETS, start=1):
+        print(f"{index}. {style_text(preset['label'], 'white', bold=True)}")
+        print(style_text(f"   {preset['description']}", 'gray'))
+    print(f"{len(WEBCAM_PRESETS) + 1}. Back to Main Menu")
+
+    while True:
+        selected = input(f"Choose a preset (1-{len(WEBCAM_PRESETS) + 1}): ").strip()
+        if is_back_command(selected) or is_exit_command(selected):
+            return None
+        try:
+            preset_index = int(selected)
+        except ValueError:
+            print_error("Invalid input. Please select one of the numbered options.")
+            continue
+
+        if 1 <= preset_index <= len(WEBCAM_PRESETS):
+            return WEBCAM_PRESETS[preset_index - 1]
+
+        if preset_index == len(WEBCAM_PRESETS) + 1:
+            return None
+
+        print_error("Invalid choice. Please select one of the listed options.")
+
+
 def calculate_session_metrics(validation_result: dict | None) -> dict:
     if validation_result is None:
         return {
@@ -387,14 +478,27 @@ def calculate_session_metrics(validation_result: dict | None) -> dict:
         }
 
     matched_repetitions = max(0, int(validation_result.get("matched_repetitions", 0)))
+    full_matched_repetitions = max(0, int(validation_result.get("full_matched_repetitions", matched_repetitions)))
+    near_matched_repetitions = max(0, int(validation_result.get("near_matched_repetitions", 0)))
     match_coverage = max(0.0, min(float(validation_result.get("technique_match_ratio", 0.0)), 1.0))
     successful_reps = matched_repetitions
     repetitions = matched_repetitions
-    base_score = successful_reps * 10
+    base_score = (full_matched_repetitions * 10) + (near_matched_repetitions * 7)
     coverage_bonus = int(round(match_coverage * 20))
-    stance_bonus = 10 if validation_result.get("technique_match") else 0
+    if validation_result.get("full_match"):
+        stance_bonus = 10
+    elif validation_result.get("near_match"):
+        stance_bonus = 6
+    else:
+        stance_bonus = 0
     score = base_score + coverage_bonus + stance_bonus
     passed = match_coverage >= 0.6 and matched_repetitions >= 1
+    if validation_result.get("full_match"):
+        match_result = "Matched"
+    elif validation_result.get("near_match"):
+        match_result = "Near Match"
+    else:
+        match_result = "Not Matched"
 
     return {
         "repetitions": repetitions,
@@ -402,10 +506,56 @@ def calculate_session_metrics(validation_result: dict | None) -> dict:
         "accuracy": match_coverage * 100,
         "score": score,
         "status": "Passed" if passed else "Needs Improvement",
-        "match_result": "Matched" if validation_result.get("technique_match") else "Not Matched",
+        "match_result": match_result,
         "match_coverage": match_coverage,
         "matched_repetitions": matched_repetitions,
+        "full_matched_repetitions": full_matched_repetitions,
+        "near_matched_repetitions": near_matched_repetitions,
     }
+
+
+def calculate_manual_session_metrics(repetitions: int, successful_reps: int) -> dict:
+    repetitions = max(1, repetitions)
+    successful_reps = max(0, min(successful_reps, repetitions))
+    accuracy = (successful_reps / repetitions) * 100
+    score = int(round((successful_reps * 10) + (accuracy * 0.2)))
+    passed = successful_reps >= 1 and accuracy >= 60.0
+    if successful_reps == repetitions:
+        match_result = "Matched"
+    elif successful_reps >= 1:
+        match_result = "Near Match"
+    else:
+        match_result = "Not Matched"
+
+    return {
+        "repetitions": repetitions,
+        "successful_reps": successful_reps,
+        "accuracy": accuracy,
+        "score": score,
+        "status": "Passed" if passed else "Needs Improvement",
+        "match_result": match_result,
+        "match_coverage": accuracy / 100,
+        "matched_repetitions": successful_reps,
+        "full_matched_repetitions": successful_reps if successful_reps == repetitions else 0,
+        "near_matched_repetitions": successful_reps if 0 < successful_reps < repetitions else 0,
+    }
+
+
+def prompt_manual_session_metrics(technique_name: str) -> dict | None:
+    print_phase("PHASE 2A", "Manual Summary Entry", "Record the practice outcome without webcam validation.")
+    print_section("Manual Practice Details")
+    print_info(f"Enter the repetitions you completed for {technique_name}.")
+    print_info("Type back or cancel to return to the main menu.")
+
+    repetitions = get_positive_int("Enter the number of repetitions performed: ")
+    if repetitions is None:
+        return None
+
+    successful_reps = get_success_count(repetitions)
+    if successful_reps is None:
+        return None
+
+    return calculate_manual_session_metrics(repetitions, successful_reps)
 
 
 def hash_password(password: str, salt_hex: str) -> str:
@@ -639,7 +789,9 @@ def run_webcam_validation_with_venv(
     camera_index: int,
     validation_frames: int | None,
     target_technique: str,
-    confirm_frames: int = 5,
+    preset: str = "fast",
+    confirm_frames: int | None = None,
+    reference_image_path: Path | None = None,
 ) -> dict:
     if not VENV_PYTHON.is_file():
         raise FileNotFoundError("Project virtual environment Python was not found at .venv\\Scripts\\python.exe")
@@ -655,16 +807,29 @@ def run_webcam_validation_with_venv(
             str(camera_index),
             "--target-technique",
             target_technique,
-            "--confirm-frames",
-            str(confirm_frames),
+            "--preset",
+            preset,
             "--json-output",
             str(temp_path),
         ]
+        if confirm_frames is not None:
+            command.extend(["--confirm-frames", str(confirm_frames)])
         if validation_frames is not None:
             command.extend(["--max-frames", str(validation_frames)])
-        completed = subprocess.run(command, check=False)
+        if reference_image_path is not None:
+            command.extend(["--reference-image", str(reference_image_path)])
+        completed = subprocess.run(command, check=False, capture_output=True, text=True)
         if completed.returncode != 0:
+            error_output = (completed.stderr or completed.stdout or "").strip()
+            if error_output:
+                raise RuntimeError(f"OpenCV webcam validation could not complete in the project virtual environment: {error_output}")
             raise RuntimeError("OpenCV webcam validation could not complete in the project virtual environment.")
+
+        if not temp_path.exists():
+            raise RuntimeError(
+                "OpenCV webcam validation ended without producing a result file. "
+                "Close other camera apps, check Windows camera permissions, and retry."
+            )
 
         return json.loads(temp_path.read_text(encoding="utf-8"))
     finally:
@@ -845,8 +1010,12 @@ def start_training(current_user: str) -> None:
     print_section("Selected Technique")
     print_kv("Technique", technique["name"], value_color="white", value_bold=True)
     print_kv("Description", technique["description"], value_color="gray")
+    reference_image_path = show_technique_reference(technique)
+    if reference_image_path is None:
+        return
 
     validation_result = None
+    manual_metrics = None
     print_phase("PHASE 2", "Validation Setup", "Choose whether to use the webcam for live guidance.")
     use_webcam_validation = ask_yes_no("Use OpenCV webcam validation for this technique?")
     if use_webcam_validation is None:
@@ -862,6 +1031,13 @@ def start_training(current_user: str) -> None:
         camera_index = default_camera_index
         print_info(f"Using webcam index {camera_index}.")
 
+        preset = choose_webcam_preset()
+        if preset is None:
+            print_warning("Training canceled. Returning to the main menu.")
+            return
+        print_kv("Webcam Preset", preset["label"], value_color="white", value_bold=True)
+        print_info(preset["description"])
+
         validation_frames = None
         print_info("The OpenCV webcam window will open with on-screen feedback for the selected move.")
         print_info("Press F for fullscreen, or Q / Esc when you want to finish webcam validation.")
@@ -874,12 +1050,14 @@ def start_training(current_user: str) -> None:
                 display=True,
                 max_frames=validation_frames,
                 target_technique=technique["name"],
-                confirm_frames=5,
+                preset=preset["name"],
+                reference_image_path=reference_image_path,
             )
         except ModuleNotFoundError as exc:
             if not is_missing_cv2_error(exc):
                 print_error(f"Webcam validation could not run: {exc}")
-                validation_result = None
+                print_warning("Training canceled. Returning to the main menu.")
+                return
             else:
                 print_warning("OpenCV is missing in the active interpreter. Retrying webcam validation with the project virtual environment.")
                 try:
@@ -887,22 +1065,31 @@ def start_training(current_user: str) -> None:
                         camera_index=camera_index,
                         validation_frames=validation_frames,
                         target_technique=technique["name"],
+                        preset=preset["name"],
+                        reference_image_path=reference_image_path,
                     )
                 except Exception as fallback_exc:
                     print_error(f"Webcam validation could not run: {fallback_exc}")
-                    validation_result = None
+                    print_warning("Training canceled. Returning to the main menu.")
+                    return
         except Exception as exc:
             print_error(f"Webcam validation could not run: {exc}")
-            validation_result = None
+            print_warning("Training canceled. Returning to the main menu.")
+            return
+    else:
+        manual_metrics = prompt_manual_session_metrics(technique["name"])
+        if manual_metrics is None:
+            print_warning("Training canceled. Returning to the main menu.")
+            return
 
-    metrics = calculate_session_metrics(validation_result)
+    metrics = manual_metrics if manual_metrics is not None else calculate_session_metrics(validation_result)
     repetitions = metrics["repetitions"]
     successful_reps = metrics["successful_reps"]
     accuracy = metrics["accuracy"]
     score = metrics["score"]
     status = metrics["status"]
     detected_technique = technique["name"]
-    openpose_detection = validation_result["recognized_technique"] if validation_result is not None else "Not Run"
+    openpose_detection = validation_result["recognized_technique"] if validation_result is not None else "Manual Entry"
     recognition_confidence = validation_result["recognized_confidence"] * 100 if validation_result is not None else 0.0
     match_result = metrics["match_result"]
 
@@ -911,10 +1098,16 @@ def start_training(current_user: str) -> None:
     print_kv("Technique", technique["name"], value_color="white", value_bold=True)
     if validation_result is not None:
         print_kv("Camera Source", validation_result.get("input_source", f"webcam {camera_index}"), value_color="white", value_bold=True)
+        print_kv("Webcam Preset", str(validation_result.get("preset", "fast")).title(), value_color="white", value_bold=True)
         print_kv("Matched Repetitions", str(metrics["matched_repetitions"]), value_color="white", value_bold=True)
+        print_kv("Full Matches", str(metrics["full_matched_repetitions"]), value_color="white", value_bold=True)
+        print_kv("Near Matches", str(metrics["near_matched_repetitions"]), value_color="white", value_bold=True)
         print_kv("Match Coverage", f"{metrics['match_coverage'] * 100:.2f}%", value_color="white", value_bold=True)
     else:
         print_kv("Camera Validation", "Not Run", value_color="gray", value_bold=True)
+        print_kv("Summary Source", "Manual Entry", value_color="white", value_bold=True)
+        print_kv("Repetitions", str(repetitions), value_color="white", value_bold=True)
+        print_kv("Successful Repetitions", str(successful_reps), value_color="white", value_bold=True)
     print_kv("Accuracy", f"{accuracy:.2f}%", value_color="white", value_bold=True)
     print_kv("Score", str(score), value_color="white", value_bold=True)
     print_status_kv("Session Status", status)

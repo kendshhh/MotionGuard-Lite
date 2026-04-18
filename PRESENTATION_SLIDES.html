@@ -116,9 +116,9 @@
       <div class="tag">Slide 2</div>
       <h2>Project Purpose</h2>
       <ul>
-        <li>Build a functional Python terminal system for guided self-defense practice.</li>
+        <li>Provide a Python-based training tool for guided self-defense practice.</li>
         <li>Combine terminal interaction, file handling, and optional OpenCV webcam validation.</li>
-        <li>Demonstrate course programming concepts through a practical real-world problem.</li>
+        <li>Solve a practical problem by helping users practice techniques and track progress.</li>
       </ul>
     </section>
 
@@ -126,10 +126,10 @@
       <div class="tag">Slide 3</div>
       <h2>Main Features</h2>
       <div class="grid">
-        <div class="card"><strong>Training Mode</strong><span>Choose a technique and generate an automatic session summary.</span></div>
-        <div class="card"><strong>Technique Guide</strong><span>View Block, Punch, and Escape instructions.</span></div>
-        <div class="card"><strong>Progress Tracking</strong><span>Save and review practice records in a text file.</span></div>
-        <div class="card"><strong>Webcam Validation</strong><span>Use OpenCV for live technique feedback and fullscreen viewing.</span></div>
+        <div class="card"><strong>Training Mode</strong><span>Practice Block, Punch, and Escape with webcam validation or manual summary entry.</span></div>
+        <div class="card"><strong>Technique Guide</strong><span>Review the purpose and steps for each technique.</span></div>
+        <div class="card"><strong>Progress Tracking</strong><span>Save and review practice records over time.</span></div>
+        <div class="card"><strong>Live Feedback</strong><span>Use OpenCV for real-time guidance and fullscreen viewing.</span></div>
       </div>
     </section>
 
@@ -151,6 +151,7 @@
       <h2>File Handling and Error Handling</h2>
       <ul>
         <li><span class="good">File Handling:</span> creates, reads, and updates <code>progress.txt</code>.</li>
+        <li><span class="good">Account Storage:</span> creates and updates <code>users.json</code> for registration and login.</li>
         <li><span class="good">Additional File Use:</span> temporary JSON validation data for OpenCV fallback flow.</li>
         <li><span class="good">Error Handling:</span> validates user input and prevents crashes on missing files or invalid values.</li>
         <li><span class="good">Exception Handling:</span> uses try/except for webcam validation, file access, and interpreter fallback.</li>
@@ -165,8 +166,9 @@
         <li>Select <strong>Start Training</strong>.</li>
         <li>Choose Block, Punch, or Escape.</li>
         <li>Choose whether to use OpenCV webcam validation.</li>
-        <li>Review live feedback and finish the session.</li>
-        <li>Show saved progress and computed results.</li>
+        <li>If Yes, review live feedback and finish the webcam session.</li>
+        <li>If No, enter repetitions and successful repetitions manually.</li>
+        <li>Show the session summary, saved progress, and computed results.</li>
       </ol>
     </section>
 
@@ -185,7 +187,7 @@
     <section class="slide">
       <div class="tag">Slide 8</div>
       <h2>Conclusion</h2>
-      <p>MotionGuard Lite is a complete Python terminal project that satisfies the required programming concepts, demonstrates practical problem solving, and provides a functional user-facing system with robust handling of both user input and system-level errors.</p>
+      <p>MotionGuard Lite is a functional and practical Python terminal project that satisfies the required programming concepts, solves a real-world training problem, and handles both user input and system-level errors in a reliable way.</p>
     </section>
   </main>
 </body>
