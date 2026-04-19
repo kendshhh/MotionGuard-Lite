@@ -131,6 +131,14 @@ The system protects itself from invalid input and runtime problems in several wa
 
 ## Instructions on How to Run the Program
 
+### First-time setup
+
+```powershell
+.\install_requirements.bat
+```
+
+This script creates the project virtual environment if `.venv` does not exist yet, then installs the required packages.
+
 ### Recommended terminal run
 
 ```powershell

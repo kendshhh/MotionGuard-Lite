@@ -34,6 +34,12 @@ MotionGuard Lite: A Python-Based Self-Defense Training Guide and Progress Tracke
 
 Prefer the project virtual environment so the OpenCV dependency is available:
 
+For first-time setup, create the project virtual environment and install dependencies:
+
+```powershell
+.\install_requirements.bat
+```
+
 ```powershell
 .\.venv\Scripts\python.exe main.py
 ```
@@ -47,7 +53,7 @@ You can also use the included batch files:
 .\run_webcam.bat --camera-index 1 --target-technique Punch
 ```
 
-If dependencies are missing, install them into the virtual environment:
+If dependencies are missing, or if `.venv` does not exist yet, run:
 
 ```powershell
 .\install_requirements.bat
